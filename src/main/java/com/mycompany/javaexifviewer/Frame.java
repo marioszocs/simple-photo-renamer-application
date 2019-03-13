@@ -1,7 +1,6 @@
 package com.mycompany.javaexifviewer;
 
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
