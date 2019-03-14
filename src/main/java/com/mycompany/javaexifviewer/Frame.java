@@ -12,8 +12,10 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileSystemView;
 
 /**
  * @author m
@@ -21,7 +23,7 @@ import javax.swing.JOptionPane;
 public class Frame extends javax.swing.JFrame {
 
     private static String FOLDER_PATH;
-    private static int numberOfImages = 0;
+    private static int numberOfPictures = 0;
     private static int numberingOfPictureFromThatNumber;
     private static String date;
     private static String dateOfShooting;
@@ -35,18 +37,15 @@ public class Frame extends javax.swing.JFrame {
     private static Path filePath;
     private static javaxt.io.Image image;
     private static java.util.HashMap<Integer, Object> exif;
-    
-    
-    
+
+
     public Frame() {
         initComponents();
-        this.getContentPane().setBackground(Color.CYAN);
+        this.getContentPane().setBackground(Color.ORANGE);
         descriptionMouseListener();
         descriptionMouseListener2();
-        jRadioButton4.setEnabled(false);
-        //jRadioButton5.setEnabled(false);
-        jTextField3.setText("Sample Descriptions");
-        jTextField4.setText("C:\\Users\\mario\\Desktop\\Pictures");
+        jRadioButton4.setEnabled(false); //Numb. of Picture + Date of Shooting + Description
+        jTextField3.setText("Sample Description");
         FOLDER_PATH = jTextField4.getText();
     }
 
@@ -83,12 +82,13 @@ public class Frame extends javax.swing.JFrame {
     }
 
     public void changePictureNameDateWithDescription() { //"2019.01.01. 10.09.55 - Description"
-        FOLDER_PATH = jTextField4.getText();
+        FOLDER_PATH = jTextField4.getText(); //Select a directory
         myFolder = new File(FOLDER_PATH);
         fileArray = myFolder.listFiles();
-        numberOfImages = fileArray.length;
+        numberOfPictures = fileArray.length; //Number of Pictures
 
-        for (int i = 0; i < numberOfImages; i++) {
+        for (int i = 0; i < numberOfPictures; i++) {
+
             myFile = new File(FOLDER_PATH + "\\" + fileArray[i].getName());
             filePath = myFile.toPath();
 
@@ -110,24 +110,16 @@ public class Frame extends javax.swing.JFrame {
         FOLDER_PATH = jTextField4.getText();
         myFolder = new File(FOLDER_PATH);
         fileArray = myFolder.listFiles();
-        numberOfImages = fileArray.length;
+        numberOfPictures = fileArray.length;
 
-//        int min = 0;
-//        int max = numberOfImages;
-//        jProgressBar1.setValue(min);
-//        jProgressBar1.setStringPainted(true);
-        
-        
-        for (int i = 0; i < numberOfImages; i++) {
-            jLabel9.setText("Processing the "+ i + "photos");
+        for (int i = 0; i < numberOfPictures; i++) {
+            jLabel9.setText("Processing the " + i + "photos");
             myFile = new File(FOLDER_PATH + "\\" + fileArray[i].getName());
             filePath = myFile.toPath();
 
             image = new javaxt.io.Image(FOLDER_PATH + "\\" + fileArray[i].getName());
             exif = image.getExifTags();
 
-            //jProgressBar1.setValue(i+ (max/(max-i)));
-            
             if (exif.get(0x0132) != null) {
                 dateOfShooting = exif.get(0x0132).toString().replace(":", ".");
                 myFile.renameTo(new File(FOLDER_PATH + "\\" + dateOfShooting + ".jpg"));
@@ -137,13 +129,13 @@ public class Frame extends javax.swing.JFrame {
         }
     }
 
-    public void changePictureNameDateOfEdit() throws IOException {  //Date of edit
+    public void changePictureNameDateOfEdit() throws IOException {  //1. - 2017.1.9 16.48.12 - Sample Description
         FOLDER_PATH = jTextField4.getText();
         myFolder = new File(FOLDER_PATH);
         fileArray = myFolder.listFiles();
-        numberOfImages = fileArray.length;
+        numberOfPictures = fileArray.length;
 
-        for (int i = 0; i < numberOfImages; i++) {
+        for (int i = 0; i < numberOfPictures; i++) {
             myFile = new File(FOLDER_PATH + "\\" + fileArray[i].getName());
             filePath = myFile.toPath();
 
@@ -171,9 +163,9 @@ public class Frame extends javax.swing.JFrame {
         FOLDER_PATH = jTextField4.getText();
         File myFolder = new File(FOLDER_PATH);
         File[] fileArray = myFolder.listFiles();
-        numberOfImages = fileArray.length;
+        numberOfPictures = fileArray.length;
 
-        for (int i = 0; i < numberOfImages; i++) {
+        for (int i = 0; i < numberOfPictures; i++) {
             File myFile = new File(FOLDER_PATH + "\\" + fileArray[i].getName());
             changedImageName = "" + (i + numberingOfPictureFromThatNumber);
             myFile.renameTo(new File(FOLDER_PATH + "\\" + changedImageName + ".jpg"));
@@ -203,6 +195,7 @@ public class Frame extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -259,8 +252,6 @@ public class Frame extends javax.swing.JFrame {
 
         jLabel6.setText("Etc.: 1. - 2019.01.01. 10.32.55 - Description");
 
-        jTextField4.setText("C:\\\\Users\\\\mario\\\\Desktop\\\\pics");
-
         jButton1.setText("Start the proces");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -274,6 +265,13 @@ public class Frame extends javax.swing.JFrame {
         jLabel8.setText("Etc.: 2019.01.01. 10.32.55");
 
         jLabel9.setText("jLabel9");
+
+        jButton2.setText("Select a directory");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jMenu1.setText("File");
         jMenuBar1.add(jMenu1);
@@ -298,11 +296,13 @@ public class Frame extends javax.swing.JFrame {
                         .addGap(31, 31, 31)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jTextField4, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-                            .addComponent(jTextField3)))
+                            .addComponent(jTextField3))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2))
                     .addComponent(jLabel2))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(49, Short.MAX_VALUE)
+                .addContainerGap(61, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jRadioButton2)
                     .addGroup(layout.createSequentialGroup()
@@ -324,7 +324,7 @@ public class Frame extends javax.swing.JFrame {
                     .addComponent(jLabel3)
                     .addComponent(jLabel5)
                     .addComponent(jLabel6))
-                .addGap(53, 53, 53))
+                .addGap(58, 58, 58))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -332,7 +332,8 @@ public class Frame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -364,7 +365,7 @@ public class Frame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9))
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         pack();
@@ -384,9 +385,8 @@ public class Frame extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // Start the proces Button
-        //FOLDER_PATH = jTextField1.getText(); //Example: "C:\\Users\\mario\\Desktop\\pics"
 
-        //Numbering of pictures from that number ...
+        //Numbering of pictures from that number --> (1. 2. 3.)
         if (jRadioButton1.isSelected()) {
 
             try {
@@ -406,24 +406,24 @@ public class Frame extends javax.swing.JFrame {
 
         }
 
-        //Just Date of Shooting
+        //Just Date of Shooting --> ("2019.01.01. 10.09.55")
         if (jRadioButton2.isSelected()) {
             descriptionOfPhotos = jTextField3.getText();
             changePictureNameDateOfShooting();
         }
 
-        //Date of Shooting with Description Of Photos
+        //Date of Shooting with Description Of Photos --> ("2019.01.01. 10.09.55 - Description")
         if (jRadioButton3.isSelected()) {
             descriptionOfPhotos = jTextField3.getText();
             changePictureNameDateWithDescription();
         }
 
-        //Numbering of picture + Date of shooting + Description
+        //Numbering of picture + Date of shooting + Description --> (TO-DO)
         if (jRadioButton4.isSelected()) {
             descriptionOfPhotos = jTextField3.getText();
         }
 
-        //Date of edit
+        //Date of edit --> (1. - 2017.1.9 16.48.12 - Sample Description)
         if (jRadioButton5.isSelected()) {
             descriptionOfPhotos = jTextField3.getText();
             try {
@@ -434,6 +434,20 @@ public class Frame extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+
+        JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+        jfc.setDialogTitle("Choose a directory: ");
+        jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        int returnValue = jfc.showSaveDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            if (jfc.getSelectedFile().isDirectory()) {
+                jTextField4.setText(jfc.getSelectedFile().toString());
+            }
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -474,6 +488,7 @@ public class Frame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
