@@ -19,16 +19,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 
+
 /**
- * Simple Photo Renaming Desktop Application
+ * Simple Photo Renamer Desktop Application
  * @author mario szocs
+ * 
+ * Used library: Exiv2
+ * is a Cross-platform C++ library and a command line utility to manage image metadata.
+ * https://www.exiv2.org/tags.html
  *
  */
 
@@ -51,7 +58,10 @@ public class Swing {
 	private static JLabel lblNewLabel_2;
 	private static JLabel lblNewLabel_3;
 	private static JLabel lblNewLabel_4;
-	private static JLabel jProgressBar1;
+	private static JLabel labelForProgressBar;
+	
+	JFileChooser fileChooser;
+	JProgressBar progressBar;
 
 	private static String FOLDER_PATH;
 	private static int numberOfImages = 0;
@@ -103,16 +113,27 @@ public class Swing {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
+		frame = new JFrame("Simple Photo Renamer");
 		frame.setBounds(100, 100, 731, 452);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		frame.getContentPane().setBackground(Color.ORANGE);
 
+		//ProgressBar
+		progressBar = new JProgressBar();
+		progressBar.setBounds(265, 340, 306, 25);
+		progressBar.setVisible(true);
+		progressBar.setStringPainted(true);
+		progressBar.setValue(0);
+		frame.getContentPane().add(progressBar);
+
 		JButton StartTheProcessButton = new JButton("Start the Process");
 		StartTheProcessButton.addActionListener(new ActionListener() {
 
+			
+			
 			public void actionPerformed(ActionEvent e) {
+				
 				// Numbering of Pictures from given number ...
 				if (radioButton01.isSelected()) {
 					try {
@@ -171,6 +192,16 @@ public class Swing {
 		frame.getContentPane().add(labelLocation);
 
 		textFieldLocation = new JTextField();
+		textFieldLocation.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				fileChooser = new JFileChooser(); 
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		        int option = fileChooser.showOpenDialog(frame);
+		        File selectedDirectory = fileChooser.getSelectedFile();
+		        textFieldLocation.setText(""+selectedDirectory);
+			}
+		});
 		textFieldLocation.setText("C:\\Users\\mario\\Desktop\\Pictures");
 		textFieldLocation.setBounds(204, 16, 268, 22);
 		frame.getContentPane().add(textFieldLocation);
@@ -188,7 +219,7 @@ public class Swing {
 				textFieldPictureDescription.setText("");
 			}
 		});
-		textFieldPictureDescription.setFont(new Font("Tahoma", Font.ITALIC, 13));
+		textFieldPictureDescription.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		textFieldPictureDescription.setText("Sample Description");
 		textFieldPictureDescription.setBounds(204, 51, 268, 22);
 		frame.getContentPane().add(textFieldPictureDescription);
@@ -308,19 +339,32 @@ public class Swing {
 		lblNewLabel_4.setBounds(416, 260, 268, 16);
 		frame.getContentPane().add(lblNewLabel_4);
 
-		jProgressBar1 = new JLabel("ProgressBar");
-		jProgressBar1.setBounds(292, 340, 56, 16);
-		frame.getContentPane().add(jProgressBar1);
+		labelForProgressBar = new JLabel("");
+		labelForProgressBar.setBounds(347, 321, 170, 16);
+		frame.getContentPane().add(labelForProgressBar);
+		
+		JButton btnFolderChooser = new JButton("Select a folder");
+		btnFolderChooser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				fileChooser = new JFileChooser(); 
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		        int option = fileChooser.showOpenDialog(frame);
+		        File selectedDirectory = fileChooser.getSelectedFile();
+		        textFieldLocation.setText(""+selectedDirectory);
+				
+			}
+		});
+		btnFolderChooser.setBounds(496, 19, 123, 19);
+		frame.getContentPane().add(btnFolderChooser);
 	}
+
 
 	
 	
 	
-	/**
-	 * Exiv2
-	 * is a Cross-platform C++ library and a command line utility to manage image metadata.
-	 * https://www.exiv2.org/tags.html
-	 */
+	
+	
+
 	public void photoInfo() {
 		// Open Image and Get EXIF Metadata
 		// javaxt.io.Image image = new javaxt.io.Image("/photo.jpg");
@@ -335,13 +379,66 @@ public class Swing {
 		System.out.println("Manufacturer: " + exif.get(0x010F));
 	}
 	
+
 	
-	//TODO
+	
+	
+	
+	
+	
+	
 	public void changePictureNameToNumberingDateAndDescription() { // "012. - 2020-08-17_10-28-24  - Description"
-		
+		FOLDER_PATH = textFieldLocation.getText();
+		myFolder = new File(FOLDER_PATH);
+		fileArray = myFolder.listFiles();
+		numberOfImages = fileArray.length;
+		progressBar.setValue(0);
+		int progresNumber = 100/numberOfImages;
+
+		for (int i = 0; i < numberOfImages; i++) {
+			myFile = new File(FOLDER_PATH + "\\" + fileArray[i].getName());
+			filePath = myFile.toPath();
+			
+			//Repaint the labelForProgressBar & progressBar
+			labelForProgressBar.setText("Renaming the " + (i+1) + ". Photo!");
+			labelForProgressBar.paintImmediately(labelForProgressBar.getVisibleRect());
+			progressBar.setValue(progresNumber*(i+1));
+			progressBar.paintImmediately(progressBar.getVisibleRect());
+
+			image = new javaxt.io.Image(FOLDER_PATH + "\\" + fileArray[i].getName());
+			exif = image.getExifTags();
+
+			//Exif.Image.DateTime 0x0132 - The date and time of image creation.
+			if (exif.get(0x0132) != null) {
+				dateOfShooting = exif.get(0x0132).toString().replace(":", "-");
+				String date = dateOfShooting.substring(0, 10);
+				String time = dateOfShooting.substring(11, 19);
+				
+				if (i <= 9) {
+					changedImageName = "00" + (i + initialSerialNumber) + " - " + date + "_" + time + " - "
+							+ descriptionOfPhotos;
+				}
+				else if (i > 99 && i <= 99) {
+					changedImageName = "0" + (i + initialSerialNumber) + " - " + date + "_" + time + " - "
+							+ descriptionOfPhotos;
+				} else {
+					changedImageName = (i + initialSerialNumber) + " - " + date + "_" + time + " - "
+							+ descriptionOfPhotos;
+				}		
+				
+				myFile.renameTo(new File(FOLDER_PATH + "\\" + changedImageName + ".jpg"));
+			} else {
+				myFile.renameTo(new File(FOLDER_PATH + "\\" + i + " - " + descriptionOfPhotos + ".jpg"));
+			}
+		}
 	}
 	
 
+	
+	
+	
+	
+	
 	public void changePictureNameDateWithDescription() { // "2020-08-17_10-28-24  - Description"
 		FOLDER_PATH = textFieldLocation.getText();
 		myFolder = new File(FOLDER_PATH);
@@ -362,10 +459,9 @@ public class Swing {
 				String time = dateOfShooting.substring(11, 19);
 				changedImageName = date + "_"+ time +" - "+ descriptionOfPhotos;
 
-
 				myFile.renameTo(new File(FOLDER_PATH + "\\" + changedImageName + ".jpg"));
 			} else {
-				myFile.renameTo(new File(FOLDER_PATH + "\\" + i + ". - " + descriptionOfPhotos + ".jpg"));
+				myFile.renameTo(new File(FOLDER_PATH + "\\" + i + " - " + descriptionOfPhotos + ".jpg"));
 			}
 		}
 	}
@@ -374,6 +470,8 @@ public class Swing {
 	
 	
 
+	
+	
 	public void changePictureNameDateOfShooting() { // "2020-08-17_10-28-24"
 		FOLDER_PATH = textFieldLocation.getText();
 		myFolder = new File(FOLDER_PATH);
@@ -381,7 +479,6 @@ public class Swing {
 		numberOfImages = fileArray.length;
 
 		for (int i = 0; i < numberOfImages; i++) {
-			// jProgressBar1.setText("Processing the " + i + "photos");
 			myFile = new File(FOLDER_PATH + "\\" + fileArray[i].getName());
 			filePath = myFile.toPath();
 
@@ -396,7 +493,7 @@ public class Swing {
 
 				myFile.renameTo(new File(FOLDER_PATH + "\\" + changedImageName + ".jpg"));
 			} else {
-				myFile.renameTo(new File(FOLDER_PATH + "\\" + (i + 1) + ". - " + descriptionOfPhotos + ".jpg"));
+				myFile.renameTo(new File(FOLDER_PATH + "\\" + (i + 1) + " - " + descriptionOfPhotos + ".jpg"));
 			}
 		}
 	}
@@ -434,14 +531,14 @@ public class Swing {
 
 				
 				if (i <= 9) {
-					changedImageName = "00" + (i + initialSerialNumber) + ". - " + date + "_" + hour + " - "
+					changedImageName = "00" + (i + initialSerialNumber) + " - " + date + "_" + hour + " - "
 							+ descriptionOfPhotos;
 				}
 				else if (i > 99 && i <= 99) {
-					changedImageName = "0" + (i + initialSerialNumber) + ". - " + date + "_" + hour + " - "
+					changedImageName = "0" + (i + initialSerialNumber) + " - " + date + "_" + hour + " - "
 							+ descriptionOfPhotos;
 				} else {
-					changedImageName = (i + initialSerialNumber) + ". - " + date + "_" + hour + " - "
+					changedImageName = (i + initialSerialNumber) + " - " + date + "_" + hour + " - "
 							+ descriptionOfPhotos;
 				}
 
