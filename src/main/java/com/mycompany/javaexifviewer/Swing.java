@@ -33,9 +33,9 @@ import javax.swing.JTextField;
  * Simple Photo Renamer Desktop Application
  * @author mario szocs
  * 
- * Used library: Exiv2
- * is a Cross-platform C++ library and a command line utility to manage image metadata.
- * https://www.exiv2.org/tags.html
+ * Used library: javaxt.io.Image
+ * The javaxt.io.Image class is designed to simplify reading, writing, and manipulating image files.
+ * https://www.javaxt.com/javaxt-core/io/Image/
  *
  */
 
