@@ -1,6 +1,7 @@
 # Simple Photo Renamer Application
 
-This is a simple desktop application for renaming **multiple photos** that I developed in Java using the Eclipse IDE.
+This is a simple desktop application for renaming **many photos** at once. 
+It was developed in Java using the Eclipse IDE.
 
 </br>
 
